@@ -2,6 +2,7 @@
   "name": "sashimi",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
   "type": "module",
   "scripts": {
     "dev": "bun --hot --port=5173 ./index.html",
