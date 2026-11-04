@@ -4,16 +4,32 @@ a basic whiteboard that looks like excalidraw/tldraw, but using all the fonts on
 
 ![An excalidraw-like web app named sashimi](./image.png)
 
+<br>
+
 ## Quick start
 
 Requires [Bun](https://bun.sh):
 
 ```sh
+# Clone the repo
 git clone https://github.com/JosephBARBIERDARNAL/sashimi.git
-cd sashimi
-bun install
-bun run dev
+
+# Install it and launch the dev server
+cd sashimi && bun install && bun run dev
 ```
+
+<br>
+
+## Motivation
+
+Excalidraw/tldraw are nice, but their web app lack basic features. The two main features that I don't get why aren't present are:
+
+- being able to pick any color I want
+- being able to pick any fonts installed on my machine
+
+that's exactly what `sashimi` brings to the table!
+
+<br>
 
 ## License
 
