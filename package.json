@@ -1,0 +1,33 @@
+{
+  "name": "sashimi",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --hot --port=5173 ./index.html",
+    "build": "rm -rf dist && bun build ./index.html --outdir dist --production --sourcemap=linked",
+    "preview": "bunx serve dist",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "test": "bun test",
+    "ci": "bun run typecheck && bun run check && bun test && bun run build"
+  },
+  "dependencies": {
+    "@fontsource/caveat": "^5.3.0",
+    "nanoid": "^6.0.2",
+    "perfect-freehand": "^1.2.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "roughjs": "^4.6.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.5",
+    "@types/bun": "^1.4.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2"
+  }
+}
