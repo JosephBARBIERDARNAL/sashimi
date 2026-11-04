@@ -50,7 +50,9 @@ export function Canvas({ onContextMenu }: { onContextMenu: (x: number, y: number
       className={`canvas ${theme === "dark" ? "dark" : ""}`}
       onPointerDown={(e) => {
         if (e.button === 0 || e.button === 1) e.currentTarget.setPointerCapture(e.pointerId);
-        if (e.button === 1) e.preventDefault();
+        // Prevent the browser's mousedown focus change: it would immediately blur
+        // a text editor opened by this very click (text tool).
+        e.preventDefault();
         onPointerDown(e);
       }}
       onPointerMove={(e) => onPointerMove(e, e.currentTarget)}

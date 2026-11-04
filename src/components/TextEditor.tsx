@@ -26,6 +26,11 @@ function Editor({ id }: { id: string }) {
     if (!t) return;
     t.focus();
     t.select();
+    // Re-assert focus after the current pointer event finishes.
+    const raf = requestAnimationFrame(() => {
+      if (document.activeElement !== t) t.focus();
+    });
+    return () => cancelAnimationFrame(raf);
   }, []);
 
   const latest = useRef(value);
