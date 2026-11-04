@@ -1,6 +1,6 @@
 # 🍣 Sashimi
 
-A local-first, hand-drawn style whiteboard in the spirit of Excalidraw/tldraw — with **every font installed on your computer** and a **much bigger color palette**.
+a basic whiteboard that looks like excalidraw/tldraw, but using all the fonts on your system and any color, that's it! (and it's 100% local)
 
 ## Quick start
 
