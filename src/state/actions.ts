@@ -7,31 +7,56 @@ import { randomSeed, remapId, toRecord, updateEls } from "./elements";
 import { syncBindings } from "./bindings";
 import { MAX_ZOOM, MIN_ZOOM } from "../core/constants";
 
+let previewBase: El[] | null = null;
+
+/** Pure: apply style properties to the selected elements, skipping ones they don't apply to. */
+export const applyStyles = (elements: El[], sel: Record<string, true>, patch: Partial<ItemStyle>): El[] => {
+  const keys = Object.keys(patch) as (keyof ItemStyle)[];
+  const fontChange = keys.includes("fontFamily") || keys.includes("fontSize");
+  const els = updateEls(elements, sel, (el) => {
+    const n: El = { ...el };
+    for (const key of keys) {
+      if (key === "backgroundColor" && (isLinear(el) || el.type === "text")) continue;
+      if ((key === "startArrowhead" || key === "endArrowhead") && el.type !== "arrow") continue;
+      if ((key === "fontFamily" || key === "fontSize" || key === "textAlign") && el.fontSize === undefined) continue;
+      (n as unknown as Record<string, unknown>)[key] = patch[key];
+    }
+    if (fontChange && n.type === "text") return measureTextEl(n);
+    if (fontChange && n.text) return fitContainerToText(n);
+    return n;
+  });
+  return fontChange ? syncBindings(els, new Set(Object.keys(sel))) : els;
+};
+
 /** User-level commands operating on the store (each one is an undo step). */
 export const actions = {
   /** Apply style properties to the selection and remember them for new elements. */
   setStyles(patch: Partial<ItemStyle>) {
+    actions.endPreview();
     const s = store.state;
     store.setState({ currentItem: { ...s.currentItem, ...patch } });
-    const sel = s.selectedIds;
-    if (!Object.keys(sel).length) return;
-    const keys = Object.keys(patch) as (keyof ItemStyle)[];
-    const fontChange = keys.includes("fontFamily") || keys.includes("fontSize");
-    let els = updateEls(store.elements, sel, (el) => {
-      const n: El = { ...el };
-      for (const key of keys) {
-        if (key === "backgroundColor" && (isLinear(el) || el.type === "text")) continue;
-        if ((key === "startArrowhead" || key === "endArrowhead") && el.type !== "arrow") continue;
-        if ((key === "fontFamily" || key === "fontSize" || key === "textAlign") && el.fontSize === undefined) continue;
-        (n as unknown as Record<string, unknown>)[key] = patch[key];
-      }
-      if (fontChange && n.type === "text") return measureTextEl(n);
-      if (fontChange && n.text) return fitContainerToText(n);
-      return n;
-    });
-    if (fontChange) els = syncBindings(els, new Set(Object.keys(sel)));
-    store.setElements(els);
+    if (!Object.keys(s.selectedIds).length) return;
+    store.setElements(applyStyles(store.elements, s.selectedIds, patch));
     store.commit();
+  },
+
+  /**
+   * Temporarily show a style on the selection (e.g. hovering a font) without
+   * creating an undo step. Always computed from the pre-preview elements.
+   */
+  previewStyles(patch: Partial<ItemStyle>) {
+    const sel = store.state.selectedIds;
+    if (!Object.keys(sel).length) return;
+    previewBase ??= store.elements;
+    store.setElements(applyStyles(previewBase, sel, patch));
+  },
+
+  /** Drop any preview and restore the elements as they were. */
+  endPreview() {
+    if (!previewBase) return;
+    const base = previewBase;
+    previewBase = null;
+    store.setElements(base);
   },
 
   setStyle<K extends keyof ItemStyle>(key: K, value: ItemStyle[K]) {

@@ -63,7 +63,18 @@ function FontList({ value, onPick }: { value: string; onPick: (f: string) => voi
 
   useEffect(() => {
     loadFonts(false);
+    // Closing the list without picking restores the original font.
+    return () => actions.endPreview();
   }, []);
+
+  const preview = (family: string | undefined) => {
+    if (family) actions.previewStyles({ fontFamily: family });
+  };
+  const moveActive = (n: number) => {
+    setActive(n);
+    scrollTo(n);
+    preview(items[n]?.family);
+  };
 
   const items = useMemo(() => {
     const ql = q.trim().toLowerCase();
@@ -83,8 +94,6 @@ function FontList({ value, onPick }: { value: string; onPick: (f: string) => voi
     return out;
   }, [q, systemFonts, recent]);
 
-  useEffect(() => setActive(0), []);
-
   const viewH = 300;
   const start = Math.max(0, Math.floor(scroll / ITEM_H) - 4);
   const end = Math.min(items.length, Math.ceil((scroll + viewH) / ITEM_H) + 4);
@@ -103,18 +112,17 @@ function FontList({ value, onPick }: { value: string; onPick: (f: string) => voi
         className="font-search"
         placeholder={`Search ${systemFonts.length ? `${systemFonts.length} ` : ""}fonts or type any font name…`}
         value={q}
-        onChange={(e) => setQ(e.target.value)}
+        onChange={(e) => {
+          setQ(e.target.value);
+          setActive(0);
+        }}
         onKeyDown={(e) => {
           if (e.key === "ArrowDown") {
             e.preventDefault();
-            const n = Math.min(items.length - 1, active + 1);
-            setActive(n);
-            scrollTo(n);
+            moveActive(Math.min(items.length - 1, active + 1));
           } else if (e.key === "ArrowUp") {
             e.preventDefault();
-            const n = Math.max(0, active - 1);
-            setActive(n);
-            scrollTo(n);
+            moveActive(Math.max(0, active - 1));
           } else if (e.key === "Enter" && items[active]) onPick(items[active]!.family);
         }}
       />
@@ -137,6 +145,7 @@ function FontList({ value, onPick }: { value: string; onPick: (f: string) => voi
         className="font-scroll"
         style={{ height: viewH }}
         onScroll={(e) => setScroll((e.target as HTMLDivElement).scrollTop)}
+        onMouseLeave={() => actions.endPreview()}
       >
         <div style={{ height: items.length * ITEM_H, position: "relative" }}>
           {items.slice(start, end).map((it, k) => {
@@ -149,7 +158,10 @@ function FontList({ value, onPick }: { value: string; onPick: (f: string) => voi
                 type="button"
                 className={`font-item ${it.family === value ? "selected" : ""} ${i === active ? "kb" : ""}`}
                 style={{ top: i * ITEM_H, height: ITEM_H }}
-                onMouseEnter={() => setActive(i)}
+                onMouseEnter={() => {
+                  setActive(i);
+                  preview(it.family);
+                }}
                 onClick={() => onPick(it.family)}
               >
                 <span className="font-name" style={{ fontFamily: fontStack(it.family) }}>
