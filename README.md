@@ -8,7 +8,7 @@ a basic whiteboard that looks like excalidraw/tldraw, but using all the fonts on
 
 ## Quick start
 
-Requires [Bun](https://bun.sh):
+You can either [use the website]() or run the code yourself, which requires [Bun](https://bun.sh):
 
 ```sh
 # Clone the repo
